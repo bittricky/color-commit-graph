@@ -4,7 +4,7 @@
 // @version      0.1
 // @description  Change the color scheme of GitHub's contribution graph
 // @author       Mitul Patel
-// @match        https://github.com/*
+// @match        https://github.com/bittricky
 // @grant        none
 // ==/UserScript==
 
@@ -17,14 +17,14 @@
             LEVEL3: '#ff6e6e',
             LEVEL2: '#ff8787',
             LEVEL1: '#ffafaf',
-            LEVEL0: '#ffd7d7'
+            LEVEL0: '#161b22'
         },
         light: {
             LEVEL4: '#db143c',
             LEVEL3: '#e3305f',
             LEVEL2: '#e95782',
             LEVEL1: '#ef7ea5',
-            LEVEL0: '#f7bac9'
+            LEVEL0: '#ebedf0'
         }
     };
 
@@ -45,23 +45,35 @@
     }
 
     function updateGraphColors(colorLevels) {
-        const elements = document.querySelectorAll('.day');
-        elements.forEach(element => {
-            const count = parseInt(element.getAttribute('data-count'), 10);
-            let fillColor = '';
-            if (count >= 18) {
-                fillColor = colorLevels.LEVEL4;
-            } else if (count >= 11) {
-                fillColor = colorLevels.LEVEL3;
-            } else if (count >= 5) {
-                fillColor = colorLevels.LEVEL2;
-            } else if (count >= 1) {
-                fillColor = colorLevels.LEVEL1;
-            } else {
-                fillColor = colorLevels.LEVEL0;
-            }
-            element.style.fill = fillColor;
-        });
+        const elements = document.querySelectorAll('.ContributionCalendar-day');
+        if (elements.length > 0) {
+            elements.forEach(element => {
+                const count = parseInt(element.getAttribute('data-level'), 10);
+
+                const thresholds = [
+                    { limit: 18, color: colorLevels.LEVEL4 },
+                    { limit: 11, color: colorLevels.LEVEL3 },
+                    { limit: 5, color: colorLevels.LEVEL2 },
+                    { limit: 1, color: colorLevels.LEVEL1 },
+                    { limit: 0, color: colorLevels.LEVEL0 }
+                ];
+                
+                const fillColor = thresholds.find(threshold => count >= threshold.limit).color;
+
+                element.style['background-color'] = fillColor;
+            });
+        } else {
+            //Observe changes to the DOM nodes
+            const observer = new MutationObserver(mutations => {
+                mutations.forEach(mutation => {
+                    if (mutation.addedNodes && mutation.addedNodes.length > 0) {
+                        updateGraphColors(colorLevels);
+                        observer.disconnect();
+                    }
+                });
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
     }
 
     function init() {
