@@ -8,7 +8,7 @@
 // @grant        none
 // ==/UserScript==
 
-(function() {
+(function() {                                                                                                                                                                                                                                                                                                               
     'use strict';
 
     const colorThemes = {
@@ -59,7 +59,7 @@
                 ];
                 
                 const fillColor = thresholds.find(threshold => count >= threshold.limit).color;
-
+                element.style.fill = fillColor;
                 element.style['background-color'] = fillColor;
             });
         } else {
